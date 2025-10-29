@@ -9,17 +9,19 @@ import {
   Settings, 
   Users, 
   DollarSign,
+  Package,
   FileText,
   Shield
 } from 'lucide-react'
 
 const navigation = [
-  { name: 'Dashboard', href: '/', icon: Home, roles: ['admin', 'user'] },
-  { name: 'Analytics', href: '/analytics', icon: BarChart3, roles: ['admin', 'user'] },
-  { name: 'Users', href: '/users', icon: Users, roles: ['admin'] },
-  { name: 'Sales', href: '/sales', icon: DollarSign, roles: ['admin', 'user'] },
-  { name: 'Reports', href: '/reports', icon: FileText, roles: ['admin'] },
-  { name: 'Settings', href: '/settings', icon: Settings, roles: ['admin', 'user'] },
+  { name: 'Dashboard', href: '/', icon: Home, roles: ['ADMIN', 'USER', 'MODERATOR'] },
+  { name: 'Analytics', href: '/analytics', icon: BarChart3, roles: ['ADMIN', 'MODERATOR'] },
+  { name: 'Users', href: '/users', icon: Users, roles: ['ADMIN'] },
+  { name: 'Sales', href: '/sales', icon: DollarSign, roles: ['ADMIN', 'MODERATOR'] },
+  { name: 'Products', href: '/products', icon: Package, roles: ['ADMIN', 'MODERATOR'] },
+  { name: 'Reports', href: '/reports', icon: FileText, roles: ['ADMIN'] },
+  { name: 'Settings', href: '/settings', icon: Settings, roles: ['ADMIN', 'USER', 'MODERATOR'] },
 ]
 
 export function Sidebar() {

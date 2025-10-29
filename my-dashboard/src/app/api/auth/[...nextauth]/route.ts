@@ -1,26 +1,9 @@
 import NextAuth from 'next-auth'
-import type { NextAuthOptions } from 'next-auth'
 import CredentialsProvider from 'next-auth/providers/credentials'
 import bcrypt from 'bcryptjs'
+import { prisma } from '@/lib/prisma'
 
-// Mock user database - in Step 5 we'll replace this with real database
-const users = [
-  {
-    id: '1',
-    name: 'Admin User',
-    email: 'admin@example.com',
-    password: '$2b$12$MX8T5mw0ZCpRWwXjbZwjqudJBKRfjeSGz0zj.Mr01RIOMXL6ymThu', // password: password123
-    role: 'admin',
-  },
-  {
-    id: '2', 
-    name: 'John Doe',
-    email: 'john@example.com',
-    password: '$2b$12$MX8T5mw0ZCpRWwXjbZwjqudJBKRfjeSGz0zj.Mr01RIOMXL6ymThu', // password: password123
-    role: 'user',
-  },
-]
-const authOptions: NextAuthOptions = {
+const authOptions = {
   providers: [
     CredentialsProvider({
       name: 'credentials',
@@ -33,14 +16,18 @@ const authOptions: NextAuthOptions = {
           return null
         }
 
-        // Find user in mock database
-        const user = users.find(user => user.email === credentials.email)
+        // Find user in database
+        const user = await prisma.user.findUnique({
+          where: {
+            email: credentials.email
+          }
+        })
         
         if (!user) {
           return null
         }
 
-        // Check password - in real app, use proper password hashing
+        // Check password
         const isPasswordValid = await bcrypt.compare(credentials.password, user.password)
 
         if (!isPasswordValid) {
@@ -57,13 +44,13 @@ const authOptions: NextAuthOptions = {
     })
   ],
   callbacks: {
-    async jwt({ token, user }) {
+    async jwt({ token, user }: { token: any; user?: any | null }) {
       if (user) {
         token.role = user.role
       }
       return token
     },
-    async session({ session, token }) {
+    async session({ session, token }: { session: any; token: any }) {
       if (token) {
         session.user.id = token.sub!
         session.user.role = token.role as string
@@ -73,7 +60,7 @@ const authOptions: NextAuthOptions = {
   },
   pages: {
     signIn: '/auth/signin',
-    newUser: '/auth/signup'
+    signUp: '/auth/signup'
   },
   session: {
     strategy: 'jwt' as const,
@@ -81,5 +68,9 @@ const authOptions: NextAuthOptions = {
 }
 
 const handler = NextAuth(authOptions)
+
+export { authOptions }
+
+
 
 export { handler as GET, handler as POST }

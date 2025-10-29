@@ -1,36 +1,66 @@
 import { NextResponse } from 'next/server'
-
-// Mock data - in real app, this would come from a database
-const dashboardData = {
-  stats: [
-    { title: "Total Revenue", value: "$32,450", description: "+20% from last month" },
-    { title: "Subscriptions", value: "+2350", description: "+180% from last month" },
-    { title: "Sales", value: "+12,234", description: "+19% from last month" },
-    { title: "Active Users", value: "+573", description: "+201 since last hour" }
-  ],
-  chartData: [
-    { name: 'Jan', revenue: 4000, users: 2400 },
-    { name: 'Feb', revenue: 3000, users: 1398 },
-    { name: 'Mar', revenue: 2000, users: 9800 },
-    { name: 'Apr', revenue: 2780, users: 3908 },
-    { name: 'May', revenue: 1890, users: 4800 },
-    { name: 'Jun', revenue: 2390, users: 3800 },
-  ],
-  recentActivity: [
-    { id: 1, time: "2 min ago", action: "New user registered" },
-    { id: 2, time: "1 hour ago", action: "Order #1234 completed" },
-    { id: 3, time: "2 hours ago", action: "Payment received" },
-    { id: 4, time: "3 hours ago", action: "New subscription started" }
-  ]
-}
+import { prisma } from '@/lib/prisma'
 
 export async function GET() {
   try {
-    // Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 500))
-    
+    // Get recent analytics data
+    const revenueData = await prisma.analytics.findMany({
+      where: { metric: 'revenue' },
+      orderBy: { date: 'asc' },
+      take: 6
+    })
+
+    const userData = await prisma.analytics.findMany({
+      where: { metric: 'users' },
+      orderBy: { date: 'asc' },
+      take: 6
+    })
+
+    // Calculate stats from database
+    const totalRevenue = await prisma.order.aggregate({
+      _sum: { total: true },
+      where: { status: 'COMPLETED' }
+    })
+
+    const totalOrders = await prisma.order.count({
+      where: { status: 'COMPLETED' }
+    })
+
+    const totalUsers = await prisma.user.count()
+
+    const recentOrders = await prisma.order.count({
+      where: {
+        createdAt: {
+          gte: new Date(Date.now() - 24 * 60 * 60 * 1000) // Last 24 hours
+        }
+      }
+    })
+
+    // Format chart data
+    const chartData = revenueData.map((revenue, index) => ({
+      name: new Date(revenue.date).toLocaleDateString('en-US', { month: 'short' }),
+      revenue: revenue.value,
+      users: userData[index]?.value || 0
+    }))
+
+    const dashboardData = {
+      stats: [
+        { title: "Total Revenue", value: `$${totalRevenue._sum.total?.toLocaleString() || '0'}`, description: "+20% from last month" },
+        { title: "Total Orders", value: totalOrders.toString(), description: "+12% from last month" },
+        { title: "Total Users", value: totalUsers.toString(), description: "+15% from last month" },
+        { title: "Recent Orders", value: `+${recentOrders}`, description: "in last 24 hours" }
+      ],
+      chartData,
+      recentActivity: [
+        { id: 1, time: "2 min ago", action: "New user registered" },
+        { id: 2, time: "1 hour ago", action: "Order #1234 completed" },
+        { id: 3, time: "2 hours ago", action: "Payment received" },
+      ]
+    }
+
     return NextResponse.json(dashboardData)
   } catch (error) {
+    console.error('Dashboard API error:', error)
     return NextResponse.json(
       { error: 'Internal Server Error' },
       { status: 500 }

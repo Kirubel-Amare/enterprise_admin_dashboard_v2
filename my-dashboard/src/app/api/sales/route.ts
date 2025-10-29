@@ -1,35 +1,60 @@
 import { NextResponse } from 'next/server'
-
-const salesData = {
-  stats: [
-    { title: "Total Revenue", value: "$32,450", description: "+20% from last month" },
-    { title: "Total Orders", value: "1,247", description: "+12% from last month" },
-    { title: "Conversion Rate", value: "3.2%", description: "+0.5% from last month" },
-    { title: "Avg. Order Value", value: "$124.50", description: "+$8.20 from last month" }
-  ],
-  salesData: [
-    { month: 'Jan', revenue: 4000, orders: 240 },
-    { month: 'Feb', revenue: 3000, orders: 139 },
-    { month: 'Mar', revenue: 2000, orders: 98 },
-    { month: 'Apr', revenue: 2780, orders: 200 },
-    { month: 'May', revenue: 1890, orders: 150 },
-    { month: 'Jun', revenue: 2390, orders: 180 },
-  ],
-  recentOrders: [
-    { id: '#ORD-001', customer: 'John Doe', amount: '$299.99', status: 'Completed', date: '2024-01-15' },
-    { id: '#ORD-002', customer: 'Jane Smith', amount: '$149.99', status: 'Processing', date: '2024-01-15' },
-    { id: '#ORD-003', customer: 'Bob Johnson', amount: '$89.99', status: 'Completed', date: '2024-01-14' },
-    { id: '#ORD-004', customer: 'Alice Brown', amount: '$199.99', status: 'Shipped', date: '2024-01-14' },
-    { id: '#ORD-005', customer: 'Charlie Wilson', amount: '$399.99', status: 'Completed', date: '2024-01-13' }
-  ]
-}
+import { prisma } from '@/lib/prisma'
 
 export async function GET() {
   try {
-    await new Promise(resolve => setTimeout(resolve, 550))
-    
+    const orders = await prisma.order.findMany({
+      include: {
+        user: {
+          select: { name: true, email: true }
+        },
+        product: {
+          select: { name: true, price: true }
+        }
+      },
+      orderBy: {
+        createdAt: 'desc'
+      },
+      take: 10
+    })
+
+    const totalRevenue = await prisma.order.aggregate({
+      _sum: { total: true },
+      where: { status: 'COMPLETED' }
+    })
+
+    const totalOrders = await prisma.order.count()
+    const pendingOrders = await prisma.order.count({
+      where: { status: 'PENDING' }
+    })
+
+    const salesData = {
+      stats: [
+        { title: "Total Revenue", value: `$${totalRevenue._sum.total?.toFixed(2) || '0'}`, description: "+20% from last month" },
+        { title: "Total Orders", value: totalOrders.toString(), description: "+12% from last month" },
+        { title: "Pending Orders", value: pendingOrders.toString(), description: "+5% from last month" },
+        { title: "Avg. Order Value", value: "$124.50", description: "+$8.20 from last month" }
+      ],
+      salesData: [
+        { month: 'Jan', revenue: 4000, orders: 240 },
+        { month: 'Feb', revenue: 3000, orders: 139 },
+        { month: 'Mar', revenue: 2000, orders: 98 },
+        { month: 'Apr', revenue: 2780, orders: 200 },
+        { month: 'May', revenue: 1890, orders: 150 },
+        { month: 'Jun', revenue: 2390, orders: 180 },
+      ],
+      recentOrders: orders.map(order => ({
+        id: `#ORD-${order.id.slice(-6).toUpperCase()}`,
+        customer: order.user.name,
+        amount: `$${order.total.toFixed(2)}`,
+        status: order.status,
+        date: order.createdAt.toISOString().split('T')[0]
+      }))
+    }
+
     return NextResponse.json(salesData)
   } catch (error) {
+    console.error('Sales API error:', error)
     return NextResponse.json(
       { error: 'Internal Server Error' },
       { status: 500 }
