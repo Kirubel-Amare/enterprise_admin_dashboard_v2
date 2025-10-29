@@ -1,5 +1,10 @@
 import './globals.css'
 import type { Metadata } from 'next'
+import { Inter } from 'next/font/google'
+import { Sidebar } from '@/components/Sidebar'
+import { Header } from '@/components/Header'
+
+const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
   title: 'My Dashboard',
@@ -13,9 +18,15 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body>
-        <div className="min-h-screen bg-gray-50">
-          {children}
+      <body className={inter.className}>
+        <div className="flex h-screen">
+          <Sidebar />
+          <div className="flex flex-1 flex-col overflow-hidden">
+            <Header />
+            <main className="flex-1 overflow-auto bg-gray-50 p-6">
+              {children}
+            </main>
+          </div>
         </div>
       </body>
     </html>
