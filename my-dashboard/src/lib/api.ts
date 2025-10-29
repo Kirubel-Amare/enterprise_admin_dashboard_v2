@@ -37,3 +37,4 @@ export const api = {
     getData: () => fetchAPI('/sales')
   }
 }
+  
