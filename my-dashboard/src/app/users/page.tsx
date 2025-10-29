@@ -1,25 +1,50 @@
-'use client'
 import { Card } from '@/components/ui/Card'
 import { Users, UserPlus, UserCheck, UserX } from 'lucide-react'
+import { api } from '@/lib/api'
 
-const users = [
-  { id: 1, name: 'John Doe', email: 'john@example.com', status: 'Active', role: 'Admin', lastLogin: '2 hours ago' },
-  { id: 2, name: 'Jane Smith', email: 'jane@example.com', status: 'Active', role: 'User', lastLogin: '1 day ago' },
-  { id: 3, name: 'Bob Johnson', email: 'bob@example.com', status: 'Inactive', role: 'User', lastLogin: '1 week ago' },
-  { id: 4, name: 'Alice Brown', email: 'alice@example.com', status: 'Active', role: 'Moderator', lastLogin: '3 hours ago' },
-]
+async function getUsersData() {
+  try {
+    const data = await api.users.getData()
+    return data
+  } catch (error) {
+    console.error('Failed to fetch users data:', error)
+    return {
+      stats: [
+        { title: "Total Users", value: "2,548", description: "+12% from last month" },
+        { title: "New Users", value: "184", description: "+8% from last month" },
+        { title: "Active Users", value: "1,927", description: "+15% from last month" },
+        { title: "Inactive Users", value: "89", description: "-2% from last month" }
+      ],
+      users: []
+    }
+  }
+}
 
-export default function UsersPage() {
+const iconMap = {
+  "Total Users": <Users className="h-6 w-6" />,
+  "New Users": <UserPlus className="h-6 w-6" />,
+  "Active Users": <UserCheck className="h-6 w-6" />,
+  "Inactive Users": <UserX className="h-6 w-6" />
+}
+
+export default async function UsersPage() {
+  const data = await getUsersData()
+
   return (
     <div>
       <h1 className="text-3xl font-bold text-gray-900 mb-2">Users</h1>
       <p className="text-gray-600 mb-6">Manage your users and permissions</p>
       
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        <Card title="Total Users" value="2,548" description="+12% from last month" icon={<Users className="h-6 w-6" />} />
-        <Card title="New Users" value="184" description="+8% from last month" icon={<UserPlus className="h-6 w-6" />} />
-        <Card title="Active Users" value="1,927" description="+15% from last month" icon={<UserCheck className="h-6 w-6" />} />
-        <Card title="Inactive Users" value="89" description="-2% from last month" icon={<UserX className="h-6 w-6" />} />
+        {data.stats.map((stat: any, index: number) => (
+          <Card 
+            key={index}
+            title={stat.title} 
+            value={stat.value} 
+            description={stat.description}
+            icon={iconMap[stat.title as keyof typeof iconMap]}
+          />
+        ))}
       </div>
 
       <div className="bg-white rounded-lg shadow">
@@ -38,13 +63,13 @@ export default function UsersPage() {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {users.map((user) => (
+              {data.users.map((user: any) => (
                 <tr key={user.id}>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center">
                       <div className="flex-shrink-0 h-10 w-10 bg-blue-500 rounded-full flex items-center justify-center">
                         <span className="text-white font-medium">
-                          {user.name.split(' ').map(n => n[0]).join('')}
+                          {user.name.split(' ').map((n: string) => n[0]).join('')}
                         </span>
                       </div>
                       <div className="ml-4">

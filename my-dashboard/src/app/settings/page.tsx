@@ -27,7 +27,7 @@ export default function Settings() {
         <div className="bg-white p-6 rounded-lg shadow">
           <div className="flex items-center mb-6">
             <User className="h-5 w-5 mr-2 text-gray-600" />
-            <h2 className="text-xl font-semibold">Profile Settings</h2>
+            <h2 className="text-xl font-semibold font-bold ">Profile Settings</h2>
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
