@@ -16,12 +16,12 @@ import {
 
 const navigation = [
   { name: 'Dashboard', href: '/dashboard', icon: Home, roles: ['ADMIN', 'USER', 'MODERATOR'] },
-  { name: 'Analytics', href: '/analytics', icon: BarChart3, roles: ['ADMIN', 'MODERATOR'] },
-  { name: 'Users', href: '/users', icon: Users, roles: ['ADMIN'] },
-  { name: 'Sales', href: '/sales', icon: DollarSign, roles: ['ADMIN', 'MODERATOR'] },
-  { name: 'Products', href: '/products', icon: Package, roles: ['ADMIN', 'MODERATOR'] },
-  { name: 'Reports', href: '/reports', icon: FileText, roles: ['ADMIN'] },
-  { name: 'Settings', href: '/settings', icon: Settings, roles: ['ADMIN', 'USER', 'MODERATOR'] },
+  { name: 'Analytics', href: '/dashboard/analytics', icon: BarChart3, roles: ['ADMIN', 'MODERATOR'] },
+  { name: 'Users', href: '/dashboard/users', icon: Users, roles: ['ADMIN'] },
+  { name: 'Sales', href: '/dashboard/sales', icon: DollarSign, roles: ['ADMIN', 'MODERATOR'] },
+  { name: 'Products', href: '/dashboard/products', icon: Package, roles: ['ADMIN', 'MODERATOR'] },
+  { name: 'Reports', href: '/dashboard/reports', icon: FileText, roles: ['ADMIN'] },
+  { name: 'Settings', href: '/dashboard/settings', icon: Settings, roles: ['ADMIN', 'USER', 'MODERATOR'] },
 ]
 
 export function Sidebar() {

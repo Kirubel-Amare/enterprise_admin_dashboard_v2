@@ -26,8 +26,7 @@ export default function SignUp() {
   })
   const router = useRouter()
   const searchParams = useSearchParams()
- // In both files, update this line:
-const callbackUrl = searchParams.get('callbackUrl') || '/dashboard'
+  const callbackUrl = searchParams.get('callbackUrl') || '/dashboard'
 
   // Check if user is already logged in
   useEffect(() => {
@@ -77,16 +76,15 @@ const callbackUrl = searchParams.get('callbackUrl') || '/dashboard'
       return
     }
 
-    if (formData.password.length < 6) {
-      setError('Password must be at least 6 characters long')
-      setLoading(false)
-      return
-    }
-
     try {
+      console.log('Starting signup process...')
+
+      // Step 1: Create user via API
       const response = await fetch('/api/auth/signup', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+        },
         body: JSON.stringify({
           name: formData.name,
           email: formData.email,
@@ -94,34 +92,45 @@ const callbackUrl = searchParams.get('callbackUrl') || '/dashboard'
         }),
       })
 
-      // Safely parse JSON
-      let data: any = null
-      const contentType = response.headers.get('content-type')
-      if (contentType && contentType.includes('application/json')) {
-        data = await response.json()
-      } else {
-        const text = await response.text()
-        throw new Error(text || 'Server returned an invalid response')
+      console.log('API Response status:', response.status)
+      console.log('API Response headers:', Object.fromEntries(response.headers))
+
+      // Get the response as text first to see what we're getting
+      const responseText = await response.text()
+      console.log('API Response text:', responseText)
+
+      let data
+      try {
+        data = JSON.parse(responseText)
+        console.log('API Response JSON:', data)
+      } catch (parseError) {
+        console.error('JSON parse error:', parseError)
+        throw new Error(`Server returned invalid JSON: ${responseText.substring(0, 100)}`)
       }
 
       if (!response.ok) {
         throw new Error(data?.error || `Registration failed: ${response.status}`)
       }
 
-      // Auto sign-in
+      console.log('User created, attempting auto sign-in...')
+
+      // Step 2: Auto sign-in after successful registration
       const result = await signIn('credentials', {
         email: formData.email,
         password: formData.password,
         redirect: false,
       })
 
+      console.log('SignIn result:', result)
+
       if (result?.error) {
+        console.log('Auto sign-in failed, redirecting to signin page')
         router.push('/auth/signin?message=Registration successful! Please sign in.')
       } else {
+        console.log('Auto sign-in successful, redirecting to dashboard')
         router.push(callbackUrl)
         router.refresh()
       }
-
     } catch (err) {
       console.error('Registration error:', err)
       setError(err instanceof Error ? err.message : 'An unexpected error occurred')
@@ -130,10 +139,10 @@ const callbackUrl = searchParams.get('callbackUrl') || '/dashboard'
     }
   }
 
-  const isFormValid = 
-    formData.name && 
-    formData.email && 
-    formData.password && 
+  const isFormValid =
+    formData.name &&
+    formData.email &&
+    formData.password &&
     formData.confirmPassword &&
     formData.password === formData.confirmPassword &&
     formData.password.length >= 6
@@ -162,8 +171,8 @@ const callbackUrl = searchParams.get('callbackUrl') || '/dashboard'
           </h2>
           <p className="mt-2 text-sm text-gray-600">
             Already have an account?{' '}
-            <Link 
-              href="/auth/signin" 
+            <Link
+              href="/auth/signin"
               className="font-medium text-blue-600 hover:text-blue-500 transition-colors"
             >
               Sign in here
@@ -252,15 +261,15 @@ const callbackUrl = searchParams.get('callbackUrl') || '/dashboard'
                   <div className="space-y-1">
                     {Object.entries(passwordStrength).map(([key, valid]) => (
                       <div className="flex items-center space-x-2" key={key}>
-                        {valid ? 
-                          <CheckCircle className="h-4 w-4 text-green-500" /> : 
+                        {valid ?
+                          <CheckCircle className="h-4 w-4 text-green-500" /> :
                           <XCircle className="h-4 w-4 text-gray-400" />
                         }
                         <span className={`text-xs ${valid ? 'text-green-600' : 'text-gray-500'}`}>
                           {key === 'length' ? 'At least 6 characters' :
-                           key === 'uppercase' ? 'One uppercase letter' :
-                           key === 'lowercase' ? 'One lowercase letter' :
-                           'One number'}
+                            key === 'uppercase' ? 'One uppercase letter' :
+                              key === 'lowercase' ? 'One lowercase letter' :
+                                'One number'}
                         </span>
                       </div>
                     ))}
@@ -308,7 +317,7 @@ const callbackUrl = searchParams.get('callbackUrl') || '/dashboard'
               name="terms"
               type="checkbox"
               required
-              className="h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300 rounded"
+              className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
             />
             <label htmlFor="terms" className="ml-2 block text-sm text-gray-900">
               I agree to the{' '}
@@ -327,7 +336,7 @@ const callbackUrl = searchParams.get('callbackUrl') || '/dashboard'
             <button
               type="submit"
               disabled={loading || !isFormValid}
-              className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-00 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-sm"
+              className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-sm"
             >
               {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : 'Create account'}
             </button>
@@ -351,8 +360,8 @@ const callbackUrl = searchParams.get('callbackUrl') || '/dashboard'
                   setFormData({
                     name: 'Demo User',
                     email: `demo-${Date.now()}@example.com`,
-                    password: 'password123',
-                    confirmPassword: 'password123'
+                    password: 'Password123',
+                    confirmPassword: 'Password123'
                   })
                 }}
                 disabled={loading}
