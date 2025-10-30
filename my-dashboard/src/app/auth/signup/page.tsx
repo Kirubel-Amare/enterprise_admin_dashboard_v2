@@ -154,7 +154,7 @@ const callbackUrl = searchParams.get('callbackUrl') || '/dashboard'
       <div className="max-w-md w-full space-y-8">
         {/* Header */}
         <div className="text-center">
-          <div className="mx-auto h-12 w-12 bg-green-600 rounded-full flex items-center justify-center">
+          <div className="mx-auto h-12 w-12 bg-blue-600 rounded-full flex items-center justify-center">
             <span className="text-white font-bold text-xl">D</span>
           </div>
           <h2 className="mt-6 text-3xl font-extrabold text-gray-900">
@@ -164,7 +164,7 @@ const callbackUrl = searchParams.get('callbackUrl') || '/dashboard'
             Already have an account?{' '}
             <Link 
               href="/auth/signin" 
-              className="font-medium text-green-600 hover:text-green-500 transition-colors"
+              className="font-medium text-blue-600 hover:text-blue-500 transition-colors"
             >
               Sign in here
             </Link>
@@ -191,7 +191,7 @@ const callbackUrl = searchParams.get('callbackUrl') || '/dashboard'
                 type="text"
                 autoComplete="name"
                 required
-                className="appearance-none relative block w-full px-3 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 focus:z-10 transition-colors"
+                className="appearance-none relative block w-full px-3 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:z-10 transition-colors"
                 placeholder="Enter your full name"
                 value={formData.name}
                 onChange={handleChange}
@@ -210,7 +210,7 @@ const callbackUrl = searchParams.get('callbackUrl') || '/dashboard'
                 type="email"
                 autoComplete="email"
                 required
-                className="appearance-none relative block w-full px-3 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 focus:z-10 transition-colors"
+                className="appearance-none relative block w-full px-3 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:z-10 transition-colors"
                 placeholder="Enter your email"
                 value={formData.email}
                 onChange={handleChange}
@@ -230,7 +230,7 @@ const callbackUrl = searchParams.get('callbackUrl') || '/dashboard'
                   type={showPassword ? 'text' : 'password'}
                   autoComplete="new-password"
                   required
-                  className="appearance-none relative block w-full px-3 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 focus:z-10 transition-colors pr-10"
+                  className="appearance-none relative block w-full px-3 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:z-10 transition-colors pr-10"
                   placeholder="Create a password (min. 6 characters)"
                   value={formData.password}
                   onChange={handleChange}
@@ -281,7 +281,7 @@ const callbackUrl = searchParams.get('callbackUrl') || '/dashboard'
                   type={showConfirmPassword ? 'text' : 'password'}
                   autoComplete="new-password"
                   required
-                  className="appearance-none relative block w-full px-3 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 focus:z-10 transition-colors pr-10"
+                  className="appearance-none relative block w-full px-3 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:z-10 transition-colors pr-10"
                   placeholder="Confirm your password"
                   value={formData.confirmPassword}
                   onChange={handleChange}
@@ -312,11 +312,11 @@ const callbackUrl = searchParams.get('callbackUrl') || '/dashboard'
             />
             <label htmlFor="terms" className="ml-2 block text-sm text-gray-900">
               I agree to the{' '}
-              <a href="#" className="text-green-600 hover:text-green-500 transition-colors">
+              <a href="#" className="text-blue-600 hover:text-blue-500 transition-colors">
                 Terms of Service
               </a>{' '}
               and{' '}
-              <a href="#" className="text-green-600 hover:text-green-500 transition-colors">
+              <a href="#" className="text-blue-600 hover:text-blue-500 transition-colors">
                 Privacy Policy
               </a>
             </label>
@@ -327,7 +327,7 @@ const callbackUrl = searchParams.get('callbackUrl') || '/dashboard'
             <button
               type="submit"
               disabled={loading || !isFormValid}
-              className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-sm"
+              className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-00 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-sm"
             >
               {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : 'Create account'}
             </button>
@@ -356,7 +356,7 @@ const callbackUrl = searchParams.get('callbackUrl') || '/dashboard'
                   })
                 }}
                 disabled={loading}
-                className="w-full inline-flex justify-center items-center py-3 px-4 border border-gray-300 rounded-lg shadow-sm bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:opacity-50 transition-colors"
+                className="w-full inline-flex justify-center items-center py-3 px-4 border border-gray-300 rounded-lg shadow-sm bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 transition-colors"
               >
                 Fill with demo data
               </button>
