@@ -7,9 +7,9 @@ export default withAuth(
   {
     callbacks: {
       authorized: ({ token, req }) => {
-        // Protect all routes except auth pages
-        if (req.nextUrl.pathname.startsWith('/auth')) {
-          return true // Allow access to auth pages
+        // Allow landing page and auth pages without authentication
+        if (req.nextUrl.pathname === '/' || req.nextUrl.pathname.startsWith('/auth')) {
+          return true
         }
         return !!token // Require authentication for all other pages
       },

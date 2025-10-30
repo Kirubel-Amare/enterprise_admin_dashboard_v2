@@ -15,7 +15,8 @@ export default function SignIn() {
   const [isCheckingSession, setIsCheckingSession] = useState(true)
   const router = useRouter()
   const searchParams = useSearchParams()
-  const callbackUrl = searchParams.get('callbackUrl') || '/'
+// In both files, update this line:
+const callbackUrl = searchParams.get('callbackUrl') || '/dashboard'
 
 
   const [successMessage, setSuccessMessage] = useState('')

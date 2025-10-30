@@ -15,7 +15,7 @@ import {
 } from 'lucide-react'
 
 const navigation = [
-  { name: 'Dashboard', href: '/', icon: Home, roles: ['ADMIN', 'USER', 'MODERATOR'] },
+  { name: 'Dashboard', href: '/dashboard', icon: Home, roles: ['ADMIN', 'USER', 'MODERATOR'] },
   { name: 'Analytics', href: '/analytics', icon: BarChart3, roles: ['ADMIN', 'MODERATOR'] },
   { name: 'Users', href: '/users', icon: Users, roles: ['ADMIN'] },
   { name: 'Sales', href: '/sales', icon: DollarSign, roles: ['ADMIN', 'MODERATOR'] },

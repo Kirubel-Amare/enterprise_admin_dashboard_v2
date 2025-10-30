@@ -26,7 +26,8 @@ export default function SignUp() {
   })
   const router = useRouter()
   const searchParams = useSearchParams()
-  const callbackUrl = searchParams.get('callbackUrl') || '/'
+ // In both files, update this line:
+const callbackUrl = searchParams.get('callbackUrl') || '/dashboard'
 
   // Check if user is already logged in
   useEffect(() => {
