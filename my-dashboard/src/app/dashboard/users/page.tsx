@@ -1,6 +1,7 @@
 import { Card } from '@/components/ui/Card'
 import { Users, UserPlus, UserCheck, UserX } from 'lucide-react'
 import { api } from '@/lib/api'
+import { apiFetch } from '../../../../utils/apiFetch'
 
 async function getUsersData() {
   try {
@@ -28,7 +29,7 @@ const iconMap = {
 }
 
 export default async function UsersPage() {
-  const data = await getUsersData()
+   const usersData = await apiFetch('/api/users');
 
   return (
     <div>
@@ -36,7 +37,7 @@ export default async function UsersPage() {
       <p className="text-gray-600 mb-6">Manage your users and permissions</p>
       
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8 text-gray-400">
-        {data.stats.map((stat: any, index: number) => (
+        {usersData.stats.map((stat: any, index: number) => (
           <Card 
             key={index}
             title={stat.title} 
@@ -63,7 +64,7 @@ export default async function UsersPage() {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {data.users.map((user: any) => (
+              {usersData.users.map((user: any) => (
                 <tr key={user.id}>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center">
