@@ -32,7 +32,7 @@ export default async function Products() {
         </button>
       </div>
       
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8 text-gray-400">
         <Card 
           title="Total Products" 
           value={products.length.toString()} 
@@ -46,7 +46,7 @@ export default async function Products() {
 
       <div className="bg-white rounded-lg shadow">
         <div className="p-6 border-b">
-          <h2 className="text-xl font-semibold">Product List</h2>
+          <h2 className="text-xl font-semibold mb-4 font-medium text-gray-500">Product List</h2>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full">

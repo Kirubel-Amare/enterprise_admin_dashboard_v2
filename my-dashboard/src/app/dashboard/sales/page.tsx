@@ -26,7 +26,7 @@ export default function Sales() {
       <h1 className="text-3xl font-bold text-gray-900 mb-2">Sales</h1>
       <p className="text-gray-600 mb-6">Sales performance and order management</p>
       
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8 text-gray-400">
         <Card title="Total Revenue" value="$32,450" description="+20% from last month" icon={<DollarSign className="h-6 w-6" />} />
         <Card title="Total Orders" value="1,247" description="+12% from last month" icon={<ShoppingCart className="h-6 w-6" />} />
         <Card title="Conversion Rate" value="3.2%" description="+0.5% from last month" icon={<TrendingUp className="h-6 w-6" />} />
@@ -35,7 +35,7 @@ export default function Sales() {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
         <div className="bg-white p-6 rounded-lg shadow">
-          <h2 className="text-xl font-semibold mb-4">Revenue Trend</h2>
+          <h2 className="text-xl font-semibold mb-4 font-medium text-gray-500">Revenue Trend</h2>
           <ResponsiveContainer width="100%" height={300}>
             <AreaChart data={salesData}>
               <CartesianGrid strokeDasharray="3 3" />
@@ -48,10 +48,10 @@ export default function Sales() {
         </div>
         
         <div className="bg-white p-6 rounded-lg shadow">
-          <h2 className="text-xl font-semibold mb-4">Recent Orders</h2>
+          <h2 className="text-xl font-semibold mb-4 font-medium text-gray-500">Recent Orders</h2>
           <div className="space-y-4">
             {recentOrders.map((order) => (
-              <div key={order.id} className="flex items-center justify-between p-4 border rounded-lg">
+              <div key={order.id} className="flex items-center justify-between p-4 border rounded-lg text-gray-700">
                 <div>
                   <p className="font-medium">{order.id}</p>
                   <p className="text-sm text-gray-500">{order.customer}</p>

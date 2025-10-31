@@ -28,7 +28,7 @@ export default function Analytics() {
       <h1 className="text-3xl font-bold text-gray-900 mb-2">Analytics</h1>
       <p className="text-gray-600 mb-6">Detailed analytics and insights</p>
       
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8 text-gray-400">
         <Card title="Total Visits" value="45.2K" description="+20.1% from last month" />
         <Card title="Page Views" value="78.3K" description="+12.4% from last month" />
         <Card title="Bounce Rate" value="42.5%" description="-2.3% from last month" />
@@ -37,7 +37,7 @@ export default function Analytics() {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
         <div className="bg-white p-6 rounded-lg shadow">
-          <h2 className="text-xl font-semibold mb-4">Traffic Overview</h2>
+          <h2 className="text-xl font-semibold mb-4 font-medium text-gray-500">Traffic Overview</h2>
           <ResponsiveContainer width="100%" height={300}>
             <LineChart data={lineData}>
               <CartesianGrid strokeDasharray="3 3" />
@@ -53,7 +53,7 @@ export default function Analytics() {
         </div>
         
         <div className="bg-white p-6 rounded-lg shadow">
-          <h2 className="text-xl font-semibold mb-4">Traffic Sources</h2>
+          <h2 className="text-xl font-semibold mb-4 font-medium text-gray-500">Traffic Sources</h2>
           <ResponsiveContainer width="100%" height={300}>
             <PieChart>
               <Pie

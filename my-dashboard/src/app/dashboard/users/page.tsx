@@ -35,7 +35,7 @@ export default async function UsersPage() {
       <h1 className="text-3xl font-bold text-gray-900 mb-2">Users</h1>
       <p className="text-gray-600 mb-6">Manage your users and permissions</p>
       
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8 text-gray-400">
         {data.stats.map((stat: any, index: number) => (
           <Card 
             key={index}
@@ -49,7 +49,7 @@ export default async function UsersPage() {
 
       <div className="bg-white rounded-lg shadow">
         <div className="p-6 border-b">
-          <h2 className="text-xl font-semibold">User List</h2>
+          <h2 className="text-xl font-semibold mb-4 font-medium text-gray-500">User List</h2>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full">
