@@ -37,7 +37,7 @@ export async function GET() {
     })
 
     // Format chart data
-    const chartData = revenueData.map((revenue, index) => ({
+    const chartData = revenueData.map((revenue: any, index: number) => ({
       name: new Date(revenue.date).toLocaleDateString('en-US', { month: 'short' }),
       revenue: revenue.value,
       users: userData[index]?.value || 0

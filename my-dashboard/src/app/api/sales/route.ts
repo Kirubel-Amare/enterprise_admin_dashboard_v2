@@ -43,7 +43,7 @@ export async function GET() {
         { month: 'May', revenue: 1890, orders: 150 },
         { month: 'Jun', revenue: 2390, orders: 180 },
       ],
-      recentOrders: orders.map(order => ({
+      recentOrders: orders.map((order: any) => ({
         id: `#ORD-${order.id.slice(-6).toUpperCase()}`,
         customer: order.user.name,
         amount: `$${order.total.toFixed(2)}`,

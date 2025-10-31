@@ -32,7 +32,7 @@ export async function GET() {
         { title: "Active Users", value: totalUsers.toString(), description: "+15% from last month" },
         { title: "Inactive Users", value: "0", description: "-2% from last month" }
       ],
-      users: users.map(user => ({
+      users: users.map((user: any) => ({
         ...user,
         lastLogin: formatLastLogin(user.createdAt),
         status: 'Active'
