@@ -1,14 +1,20 @@
+// lib/prismaClient.ts
 import { PrismaClient } from "@prisma/client";
 import { PrismaLibSQL } from "@prisma/adapter-libsql";
 
-const url = process.env.TURSO_DATABASE_URL;
-if (!url) {
-  throw new Error("TURSO_DATABASE_URL environment variable is required");
+let prisma: PrismaClient;
+
+if (process.env.NODE_ENV === "production") {
+  // Production → Turso
+  prisma = new PrismaClient({
+    adapter: new PrismaLibSQL({
+      url: process.env.TURSO_DATABASE_URL!,
+      authToken: process.env.TURSO_AUTH_TOKEN!, // optional if included in URL
+    }),
+  });
+} else {
+  // Development → SQLite
+  prisma = new PrismaClient();
 }
 
-const adapter = new PrismaLibSQL({
-  url,
-  authToken: process.env.TURSO_AUTH_TOKEN, // optional if included in URL
-});
-
-export const prisma = new PrismaClient({ adapter });
+export default prisma;
