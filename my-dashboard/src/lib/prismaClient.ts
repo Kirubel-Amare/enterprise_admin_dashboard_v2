@@ -1,21 +1,18 @@
 // lib/prismaClient.ts
+import { PrismaClient } from '@prisma/client'
 
-import { PrismaClient } from "@prisma/client";
-
-let prisma: PrismaClient;
-
-if (process.env.NODE_ENV === "production") {
-  // Production → Turso
-  prisma = new PrismaClient({
-    datasources: {
-      db: {
-        url: process.env.TURSO_DATABASE_URL!,
-      },
-    },
-  });
-} else {
-  // Development → SQLite
-  prisma = new PrismaClient();
+const prismaClientSingleton = () => {
+  return new PrismaClient({
+    log: ['query', 'error', 'warn'],
+  })
 }
 
-export default prisma;
+declare const globalThis: {
+  prismaGlobal: ReturnType<typeof prismaClientSingleton>;
+} & typeof global;
+
+const prisma = globalThis.prismaGlobal ?? prismaClientSingleton()
+
+export default prisma
+
+if (process.env.NODE_ENV !== 'production') globalThis.prismaGlobal = prisma
