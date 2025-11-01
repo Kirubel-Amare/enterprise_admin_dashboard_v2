@@ -1,81 +1,54 @@
-// lib/api.ts
-class ApiClient {
-  private getBaseUrl(): string {
-    if (typeof window !== 'undefined') {
-      // Client-side: use relative path or configured URL
-      return process.env.NEXT_PUBLIC_API_URL || '';
+
+const isServer = typeof window === 'undefined';
+const clientBase = process.env.NEXT_PUBLIC_API_URL || '';
+const serverBase =
+
+  process.env.NEXT_PUBLIC_API_URL ||
+  process.env.NEXTAUTH_URL ||
+  process.env.BASE_URL ||
+  `http://localhost:${process.env.PORT || 3000}`;
+
+const API_BASE_URL = isServer ? serverBase : clientBase;
+
+export async function fetchAPI(endpoint: string) {
+  try {
+    const url = `${API_BASE_URL}/api${endpoint}`;
+
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+  
+    });
+
+    if (!response.ok) {
+      throw new Error(`API error: ${response.status}`);
     }
-    
-    // Server-side: construct absolute URL
-    let baseUrl = 
-      process.env.NEXT_PUBLIC_API_URL ||
-      process.env.NEXTAUTH_URL ||
-      process.env.BASE_URL;
-    
-    if (!baseUrl) {
-      // Fallback for development and build time
-      baseUrl = `http://localhost:${process.env.PORT || 3000}`;
-    }
-    
-    // Ensure no trailing slash
-    return baseUrl.replace(/\/$/, '');
-  }
 
-  async fetch(endpoint: string) {
-    const baseUrl = this.getBaseUrl();
-    // Ensure endpoint starts with slash for consistency
-    const normalizedEndpoint = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
-    const url = `${baseUrl}/api${normalizedEndpoint}`;
-
-    try {
-      const response = await fetch(url, {
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        // Important for static generation
-        next: { revalidate: 60 }
-      });
-
-      if (!response.ok) {
-        // Handle different error types
-        if (response.status === 404) {
-          throw new Error(`API endpoint not found: ${endpoint}`);
-        }
-        throw new Error(`API error: ${response.status}`);
-      }
-
-      return await response.json();
-    } catch (error) {
-      console.error(`Failed to fetch ${endpoint}:`, error);
-      
-      // Return fallback data for build time
-      if (process.env.NODE_ENV === 'production' && typeof window === 'undefined') {
-        console.log('Returning empty data for build');
-        return [];
-      }
-      
-      throw error;
-    }
+    return await response.json();
+  } catch (error) {
+    console.error('API fetch error:', { endpoint, url: `${API_BASE_URL}/api${endpoint}`, error });
+    throw error;
   }
 }
 
-export const apiClient = new ApiClient();
-
-// API functions with error handling for build time
+// Specific API functions
 export const api = {
   dashboard: {
-    getData: () => apiClient.fetch('/dashboard')
+    getData: () => fetchAPI('/dashboard')
   },
   users: {
-    getData: () => apiClient.fetch('/users')
+    getData: () => fetchAPI('/users')
   },
   analytics: {
-    getData: () => apiClient.fetch('/analytics')
+    getData: () => fetchAPI('/analytics')
   },
   sales: {
-    getData: () => apiClient.fetch('/sales')
+    getData: () => fetchAPI('/sales')
   },
   products: {
-    getData: () => apiClient.fetch('/products')
+    getData: () => fetchAPI('/products')
   }
 }
+  
