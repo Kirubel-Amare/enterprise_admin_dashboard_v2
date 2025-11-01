@@ -2,7 +2,7 @@
 const isServer = typeof window === 'undefined';
 const clientBase = process.env.NEXT_PUBLIC_API_URL || '';
 const serverBase =
-
+  process.env.Database_URL ||
   process.env.NEXT_PUBLIC_API_URL ||
   process.env.NEXTAUTH_URL ||
   process.env.BASE_URL ||
