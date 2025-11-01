@@ -1,6 +1,6 @@
 import { Card } from '@/components/ui/Card'
 import { Package, Plus, Edit, Trash2 } from 'lucide-react'
-import { prisma } from '@/lib/prisma'
+import prisma from '@/lib/prismaClient'
 
 async function getProducts() {
   try {
