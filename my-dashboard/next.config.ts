@@ -1,16 +1,26 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   experimental: {
-    turbo: true
+    turbo: {
+      rules: {
+        // Ignore markdown files
+        '*.md': { raw: true },
+        // Ignore LICENSE files
+        '**/*.LICENSE': { raw: true },
+      }
+    }
   },
   webpack: (config: any) => {
-    // Ignore LICENSE and README files in node_modules
+    // Ignore markdown and license files
     config.module.rules.push({
-      test: /(LICENSE|README\.md)$/,
-      loader: 'ignore-loader',
+      test: /\.(md|LICENSE)$/,
+      type: 'asset/resource',
+      generator: {
+        filename: 'static/chunks/[path][name][ext]'
+      }
     });
     return config;
   }
-};
+}
 
 module.exports = nextConfig;
