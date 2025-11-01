@@ -1,20 +1,15 @@
 // lib/prismaClient.ts
 import { PrismaClient } from "@prisma/client";
-import { PrismaLibSQL } from "@prisma/adapter-libsql";
 
 let prisma: PrismaClient;
 
-if (process.env.NODE_ENV === "production") {
-  // Production → Turso
-  prisma = new PrismaClient({
-    adapter: new PrismaLibSQL({
-      url: process.env.TURSO_DATABASE_URL!,
-      authToken: process.env.TURSO_AUTH_TOKEN!, // optional if included in URL
-    }),
-  });
-} else {
-  // Development → SQLite
+if (!globalThis.prisma) {
   prisma = new PrismaClient();
+  if (process.env.NODE_ENV !== "production") {
+    globalThis.prisma = prisma; // Prevent multiple instances in dev
+  }
+} else {
+  prisma = globalThis.prisma;
 }
 
 export default prisma;
