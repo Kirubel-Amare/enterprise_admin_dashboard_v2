@@ -1,14 +1,14 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   experimental: {
-    turbo: {
-      rules: {
-        // Ignore markdown files
-        '*.md': { raw: true },
-        // Ignore LICENSE files
-        '**/*.LICENSE': { raw: true },
-      }
-    }
+    // turbo: {
+    //   rules: {
+    //     // Ignore markdown files
+    //     '*.md': { raw: true },
+    //     // Ignore LICENSE files
+    //     '**/*.LICENSE': { raw: true },
+    //   }
+    // }
   },
   webpack: (config: any) => {
     // Ignore markdown and license files
