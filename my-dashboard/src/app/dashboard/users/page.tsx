@@ -1,60 +1,28 @@
+'use client';
+
 import { Card } from '@/components/ui/Card'
-import { Users, UserPlus, UserCheck, UserX } from 'lucide-react'
-import prisma from '@/lib/prismaClient'
+import { Users, UserPlus, UserCheck, UserX, RefreshCw } from 'lucide-react'
+import { useEffect, useState } from 'react'
+import { useSocket } from '@/lib/socket'
 
-// Direct database access
-async function getUsersData() {
-  try {
-    const users = await prisma.user.findMany({
-      select: {
-        id: true,
-        name: true,
-        email: true,
-        role: true,
-        createdAt: true,
-      },
-      orderBy: {
-        createdAt: 'desc'
-      }
-    })
+interface User {
+  id: string;
+  name: string | null;
+  email: string;
+  role: string;
+  createdAt: string;
+  updatedAt: string;
+  status?: string;
+  lastLogin?: string;
+}
 
-    const totalUsers = users.length
-    const thirtyDaysAgo = new Date()
-    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30)
-
-    // Without a dedicated lastLogin field in the model, fallback to createdAt for recent activity/new users.
-    const newUsers = users.filter(u => u.createdAt > thirtyDaysAgo).length
-    const activeUsers = newUsers // fallback: consider recently created users as active when lastLogin isn't available
-    const inactiveUsers = totalUsers - activeUsers
-
-    // Add a computed 'status' for each user; lastLogin is not available so show 'Never'
-    const usersWithStatus = users.map(user => ({
-      ...user,
-      status: new Date(user.createdAt) > thirtyDaysAgo ? 'Active' : 'Inactive',
-      lastLogin: 'Never'
-    }))
-
-    return {
-      stats: [
-        { title: "Total Users", value: totalUsers.toString(), description: "All registered users" },
-        { title: "New Users", value: newUsers.toString(), description: "Last 30 days" },
-        { title: "Active Users", value: activeUsers.toString(), description: "Currently active" },
-        { title: "Inactive Users", value: inactiveUsers.toString(), description: "Not active" }
-      ],
-      users: usersWithStatus
-    }
-  } catch (error) {
-    console.error('Failed to fetch users data:', error)
-    return {
-      stats: [
-        { title: "Total Users", value: "0", description: "Error loading data" },
-        { title: "New Users", value: "0", description: "Error loading data" },
-        { title: "Active Users", value: "0", description: "Error loading data" },
-        { title: "Inactive Users", value: "0", description: "Error loading data" }
-      ],
-      users: []
-    }
-  }
+interface UsersData {
+  stats: Array<{
+    title: string;
+    value: string;
+    description: string;
+  }>;
+  users: User[];
 }
 
 const iconMap = {
@@ -64,16 +32,141 @@ const iconMap = {
   "Inactive Users": <UserX className="h-6 w-6" />
 }
 
-export default async function UsersPage() {
-  const data = await getUsersData()
+export default function UsersPage() {
+  const [data, setData] = useState<UsersData>({
+    stats: [
+      { title: "Total Users", value: "0", description: "Loading..." },
+      { title: "New Users", value: "0", description: "Loading..." },
+      { title: "Active Users", value: "0", description: "Loading..." },
+      { title: "Inactive Users", value: "0", description: "Loading..." }
+    ],
+    users: []
+  });
+  const [loading, setLoading] = useState(true);
+  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
+  const { socket, isConnected } = useSocket();
+
+  const fetchUsersData = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch('/api/users');
+      
+      if (!response.ok) {
+        throw new Error('Failed to fetch users');
+      }
+      
+      const usersData = await response.json();
+      setData(usersData);
+      setLastUpdated(new Date());
+    } catch (error) {
+      console.error('Failed to fetch users data:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Initial data fetch
+  useEffect(() => {
+    fetchUsersData();
+  }, []);
+
+  // Real-time updates setup
+  useEffect(() => {
+    if (!socket) return;
+
+    // Join the users room for real-time updates
+    socket.emit('join-users-room');
+
+    // Listen for user updates
+    socket.on('users-updated', (updatedData: UsersData) => {
+      setData(updatedData);
+      setLastUpdated(new Date());
+    });
+
+    // Listen for new user creation
+    socket.on('user-created', (newUser: User) => {
+      setData(prev => ({
+        ...prev,
+        users: [newUser, ...prev.users],
+        stats: prev.stats.map(stat => {
+          if (stat.title === "Total Users") {
+            return { ...stat, value: (parseInt(stat.value) + 1).toString() };
+          }
+          if (stat.title === "New Users") {
+            return { ...stat, value: (parseInt(stat.value) + 1).toString() };
+          }
+          return stat;
+        })
+      }));
+      setLastUpdated(new Date());
+    });
+
+    // Listen for user updates
+    socket.on('user-updated', (updatedUser: User) => {
+      setData(prev => ({
+        ...prev,
+        users: prev.users.map(user => 
+          user.id === updatedUser.id ? updatedUser : user
+        )
+      }));
+      setLastUpdated(new Date());
+    });
+
+    // Listen for user deletion
+    socket.on('user-deleted', (deletedUserId: string) => {
+      setData(prev => ({
+        ...prev,
+        users: prev.users.filter(user => user.id !== deletedUserId),
+        stats: prev.stats.map(stat => {
+          if (stat.title === "Total Users") {
+            return { ...stat, value: (parseInt(stat.value) - 1).toString() };
+          }
+          return stat;
+        })
+      }));
+      setLastUpdated(new Date());
+    });
+
+    return () => {
+      socket.off('users-updated');
+      socket.off('user-created');
+      socket.off('user-updated');
+      socket.off('user-deleted');
+    };
+  }, [socket]);
 
   return (
     <div>
-      <h1 className="text-3xl font-bold text-gray-900 mb-2">Users</h1>
-      <p className="text-gray-600 mb-6">Manage your users and permissions</p>
+      <div className="flex justify-between items-center mb-6">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">Users</h1>
+          <p className="text-gray-600">Manage your users and permissions</p>
+        </div>
+        <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-2 text-sm text-gray-500">
+            <div className={`w-2 h-2 rounded-full ${
+              isConnected ? 'bg-green-500' : 'bg-red-500'
+            }`} />
+            <span>{isConnected ? 'Connected' : 'Disconnected'}</span>
+          </div>
+          {lastUpdated && (
+            <span className="text-sm text-gray-500">
+              Updated: {lastUpdated.toLocaleTimeString()}
+            </span>
+          )}
+          <button
+            onClick={fetchUsersData}
+            disabled={loading}
+            className="flex items-center space-x-2 px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
+          >
+            <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
+            <span>Refresh</span>
+          </button>
+        </div>
+      </div>
       
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        {data.stats.map((stat: any, index: number) => (
+        {data.stats.map((stat, index) => (
           <Card 
             key={index}
             title={stat.title} 
@@ -95,38 +188,52 @@ export default async function UsersPage() {
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">User</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Role</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Last Login</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Last Active</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {data.users.length > 0 ? (
-                data.users.map((user: any) => (
+              {loading ? (
+                <tr>
+                  <td colSpan={5} className="px-6 py-8 text-center">
+                    <div className="flex justify-center items-center">
+                      <RefreshCw className="h-6 w-6 animate-spin text-blue-600" />
+                    </div>
+                  </td>
+                </tr>
+              ) : data.users.length > 0 ? (
+                data.users.map((user) => (
                   <tr key={user.id}>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
                         <div className="flex-shrink-0 h-10 w-10 bg-blue-500 rounded-full flex items-center justify-center">
-                          <span className="text-white font-medium">
-                            {user.name?.split(' ').map((n: string) => n[0]).join('').toUpperCase() || 'U'}
+                          <span className="text-white font-medium text-sm">
+                            {user.name ? user.name.split(' ').map((n) => n[0]).join('').toUpperCase() : 'U'}
                           </span>
                         </div>
                         <div className="ml-4">
-                          <div className="text-sm font-medium text-gray-900">{user.name || 'Unknown'}</div>
+                          <div className="text-sm font-medium text-gray-900">
+                            {user.name || 'Unknown User'}
+                          </div>
                           <div className="text-sm text-gray-500">{user.email}</div>
                         </div>
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                        user.status === 'Active' 
+                        user.status === 'active' 
                           ? 'bg-green-100 text-green-800' 
-                          : 'bg-red-100 text-red-800'
+                          : 'bg-gray-100 text-gray-800'
                       }`}>
-                        {user.status}
+                        {user.status === 'active' ? 'Active' : 'Inactive'}
                       </span>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 capitalize">{user.role}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{user.lastLogin}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 capitalize">
+                      {user.role || 'user'}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      {user.lastLogin || 'Never'}
+                    </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                       <button className="text-blue-600 hover:text-blue-900 mr-3">Edit</button>
                       <button className="text-red-600 hover:text-red-900">Delete</button>
@@ -135,8 +242,9 @@ export default async function UsersPage() {
                 ))
               ) : (
                 <tr>
-                  <td colSpan={5} className="px-6 py-4 text-center text-sm text-gray-500">
-                    No users found
+                  <td colSpan={5} className="px-6 py-8 text-center">
+                    <div className="text-gray-500 text-sm">No users found</div>
+                    <div className="text-gray-400 text-xs mt-1">Users will appear here once registered</div>
                   </td>
                 </tr>
               )}
